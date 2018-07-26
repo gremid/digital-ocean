@@ -2,16 +2,6 @@
 
 Clojure interface for Digital Ocean
 
-```
-[digitalocean "1.2"]
-```
-
-## V1
-
-V1 API will be depricated soon. See V1.md for information about the old V1 API.
-
-## V2
-
 ### Authentication
 
 You can pass in an authentication token directly to every function.
@@ -22,7 +12,7 @@ This can be found in your digital ocean account.
 
 ```clojure
 (ns myproject
-  (:require [digitalocean.v2.core :as do]))
+  (:require [digitalocean.core :as do]))
 
 (defonce token "YOURAUTHTOKEN")
 
