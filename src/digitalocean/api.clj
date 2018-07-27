@@ -1,4 +1,4 @@
-(ns digitalocean.core
+(ns digitalocean.api
   (:import [java.net URLEncoder])
   (:require [cheshire.core :as json]
 	    [org.httpkit.client :as http]))
@@ -62,6 +62,14 @@
     ([token resource-identifier & params]
       (request-builder token [resource-identifier] (into {} params))))))
 
+(def actions
+  "Fetch all actions"
+  (generic :get :actions))
+
+(def get-action
+  "Get a single action by ID"
+  actions)
+
 (def domains
   "Fetch all domains"
   (generic :get :domains))
@@ -73,9 +81,22 @@
 (defn records
   "Return all records for a domain"
   [token domain]
-  (run-request :get
-    (resource-url (str "domains/" domain "/records"))
-      token))
+  (run-request :get (resource-url :domains domain records) token))
+
+(defn get-record
+  "Return all records for a domain"
+  [token domain id]
+  (run-request :get (resource-url :domains domain "records" id) token))
+
+(defn create-record
+  "Create a record in a domain"
+  [token domain record]
+  (run-request :post (resource-url :domains domain "records") token record))
+
+(defn delete-record
+  "Delete a record in a domain by ID"
+  [token domain id]
+  (run-request :delete (resource-url :domains domain "records" id) token))
 
 (def droplets
   "Get all droplets"
@@ -102,11 +123,41 @@
 (def ssh-keys "Get all account SSH keys"
   (generic :get "account/keys"))
 
-(def get-key ssh-keys)
+(def get-ssh-key ssh-keys)
 
 (def create-key
   "Create a new SSH key"
   (generic :post "account/keys"))
+
+(def volumes
+  "Returns all volumes"
+  (generic :get :volumes))
+
+(def get-volume
+  "Get a single volume by ID"
+  volumes)
+
+(def create-volume
+  "Create a new volume"
+  (generic :post :volumes))
+
+(def delete-volume
+  "Delete a volume by ID"
+  (generic :delete :volumes))
+
+(defn volume-action
+  "Attach/Detach a volume"
+  [token type id droplet region]
+  (run-request :post (resource-url :volumes id "actions") token
+               {:type type :droplet_id droplet :region region}))
+
+(defn attach-volume
+  [token id droplet region]
+  (volume-action token "attach" id droplet region))
+
+(defn detach-volume
+  [token id droplet region]
+  (volume-action token "detach" id droplet region))
 
 (def regions
   "Returns all Digital Ocean regions"
